@@ -1,0 +1,71 @@
+---
+- name: Uninstall Portainer on Linux
+  when: ansible_os_family != "Windows"
+  block:
+    - name: "Remove iptable rule for portainer ports"
+      ansible.builtin.iptables:
+        action: append
+        chain: INPUT
+        protocol: tcp
+        destination_port: "{{ item }}"
+        ctstate: ["NEW", "ESTABLISHED"]
+        match: ["conntrack"]
+        jump: "ACCEPT"
+        state: absent
+      with_items:
+        - "8000"
+        - "{{ portainer_port | default(portainer_port_default) }}"
+
+    - name: Set Portainer Password File Path
+      ansible.builtin.set_fact:
+        portainer_password_file_path: "{{ portainer_password_file_path_linux }}"
+        portainer_local_endpoint_url: "{{ portainer_local_endpoint_url_linux }}"
+
+    - name: "Delete portainer's data folder"
+      ansible.builtin.file:
+        path: "{{ portainer_password_file_path }}"
+        state: directory
+        mode: 644
+        recurse: yes
+
+- name: Uninstall Portainer on Windows
+  when: ansible_os_family == "Windows"
+  block:
+    - name: "Remove firewall rule for ports"
+      community.windows.win_firewall_rule:
+        name: "Portainer - {{ item }}"
+        localport: "{{ item }}"
+        action: allow
+        direction: in
+        protocol: tcp
+        state: absent
+      loop:
+        - "8000"
+        - "{{ portainer_port | default(portainer_port_default) }}"
+
+    - name: Get infos about docker-compose file
+      ansible.windows.win_stat:
+        path: "{{ portainer_password_file_path_win }}\\docker-compose.yml"
+      register: compose_file_info
+
+    - name: docker-compose down (Windows)
+      when: compose_file_info.stat.exists
+      ansible.windows.win_command: docker compose down -v --remove-orphans
+      args:
+        chdir: "{{ portainer_password_file_path_win }}"
+      register: docker_compose
+      retries: 5
+      delay: 5
+      until: docker_compose.failed == false
+
+    - name: "Remove portainer's data folder"
+      ansible.windows.win_file:
+        state: absent
+        path: "{{ portainer_password_file_path_win }}/data"
+
+    - name: Remove docker-compose file
+      ansible.windows.win_file:
+        state: absent
+        path: "{{ portainer_password_file_path_win }}/docker-compose.yml"
+
+

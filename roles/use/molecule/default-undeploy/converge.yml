@@ -1,0 +1,29 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: yes
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+  tasks:
+    - name: Include vars file
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - ./vars/main.yml
+        - ../../../setup/defaults/main.yml
+
+    - name: "Include use - undeploy (service-1)"
+      ansible.builtin.include_role:
+        name: "use"
+        tasks_from: undeploy.yml
+      vars:
+        service_id: "{{ service_id_1 }}"
+
+    - name: "Include use - undeploy (service-2)"
+      ansible.builtin.include_role:
+        name: "use"
+        tasks_from: undeploy.yml
+      vars:
+        service_id: "{{ service_id_2 }}"

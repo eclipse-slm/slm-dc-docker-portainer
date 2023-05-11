@@ -1,0 +1,18 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: ubuntu1804
+    template_name: ubuntu-18-04
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../setup/molecule/default/create.yml
+    prepare: ../../../setup/molecule/default-install/converge.yml
+    destroy: ../../../setup/molecule/default/destroy.yml
+    converge: ../default-deploy/converge.yml
+    verify: ../default-deploy/verify.yml
+verifier:
+  name: ansible

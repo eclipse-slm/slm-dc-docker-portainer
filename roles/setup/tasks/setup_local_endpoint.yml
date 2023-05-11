@@ -1,0 +1,39 @@
+---
+- name: Set Portainer url
+  ansible.builtin.set_fact:
+    portainer_url: "https://{{ ansible_host }}:{{ portainer_port | default(portainer_port_default) }}"
+
+- name: Get jwt token
+  ansible.builtin.uri:
+    url: "{{ portainer_url }}/api/auth"
+    method: POST
+    body_format: json
+    body:
+      username: "admin"
+      password: "{{ portainer_admin_password | default(portainer_admin_password_default) }}"
+    validate_certs: false
+  register: get_jwt_token_response
+  until: not get_jwt_token_response.failed
+  retries: 30
+
+- name: Delegate Facts
+  set_fact:
+    portainer_jwt: "{{ get_jwt_token_response.json.jwt }}"
+
+- name: Create local endpoint
+  ansible.builtin.uri:
+    url: "{{ portainer_url }}/api/endpoints"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ get_jwt_token_response.json.jwt }}"
+    body_format: form-urlencoded
+    body:
+      EndpointCreationType: 1
+      Name: primary
+      URL: npipe:////./pipe/docker_engine
+    validate_certs: false
+  register: post_endpoint_response
+  changed_when: post_endpoint_response.status == 200
+  failed_when:
+    - post_endpoint_response.status != 200
+    - post_endpoint_response.json.message | default("") != "Name is not unique"

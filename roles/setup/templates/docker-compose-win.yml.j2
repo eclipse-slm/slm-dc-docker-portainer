@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  portainer:
+    image: portainer/portainer-ce
+    command: --admin-password-file /data/password
+    restart: always
+    ports:
+      - {{ portainer_port | default(portainer_port_default) }}:9443
+      - 8000:8000
+    volumes:
+      - type: npipe
+        source: {{ portainer_local_endpoint_url }}
+        target: {{ portainer_local_endpoint_url }}
+      - {{ portainer_password_file_path }}\data:C:\data
+

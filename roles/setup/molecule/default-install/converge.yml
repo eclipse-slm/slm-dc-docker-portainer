@@ -1,0 +1,34 @@
+---
+- name: Converge - Install
+  hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Check if windows host
+      ansible.builtin.set_fact:
+        is_win_host: "{{ 'win-ssh' in group_names or 'winrm' in group_names }}"
+
+    - name: "Include docker - install"
+      when: not is_win_host
+      ansible.builtin.include_role:
+        name: "docker"
+
+    - name: "Include docker_portainer - setup"
+      ansible.builtin.include_role:
+        name: "setup"
+
+- name: Setup Portainer (Windows-only)
+  hosts: all
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+  tasks:
+    - name: Include setup_local_endpoint
+      when: ansible_os_family == "Windows"
+      ansible.builtin.include_role:
+        name: setup
+        tasks_from: setup_local_endpoint.yml
+

@@ -1,0 +1,35 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: ubuntu1804
+    template_name: ubuntu-18-04
+    groups: ['ssh']
+
+  - name: ubuntu2004
+    template_name: ubuntu-20-04
+    groups: ['ssh']
+
+  - name: ubuntu2204
+    template_name: ubuntu-22-04
+    groups: ['ssh']
+
+  - name: centos7
+    template_name: centos-7
+    groups: ['ssh']
+
+  - name: centos8
+    template_name: centos-stream-8
+    groups: ['ssh']
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../default/create.yml
+    prepare: ../default-install/converge.yml
+    destroy: ../default/destroy.yml
+    converge: ../default-uninstall/converge.yml
+    verify: ../default-uninstall/verify.yml
+verifier:
+  name: ansible

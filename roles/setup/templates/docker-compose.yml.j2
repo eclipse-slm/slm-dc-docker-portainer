@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  portainer:
+    image: portainer/portainer-ce
+    command: --admin-password-file /data/password  -H unix://{{ portainer_local_endpoint_url }}
+    restart: always
+    ports:
+      - {{ portainer_port | default(portainer_port_default) }}:9443
+      - 8000:8000
+    volumes:
+      - {{ portainer_local_endpoint_url }}:{{ portainer_local_endpoint_url }}
+      - {{ portainer_password_file_path }}/data:/data

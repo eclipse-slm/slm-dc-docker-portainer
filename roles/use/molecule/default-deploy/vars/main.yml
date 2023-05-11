@@ -1,0 +1,4 @@
+---
+service_id: 1d7905ad-b3f7-49fb-b8a2-e0b697be8da7
+docker_compose_file: "{{ lookup('file', './files/docker-compose.yml') | from_yaml }}"
+docker_compose_file_win: "{{ lookup('file', './files/docker-compose-win.yml') | from_yaml }}"

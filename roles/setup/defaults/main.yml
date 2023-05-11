@@ -1,0 +1,9 @@
+---
+# defaults file for setup
+
+portainer_port_default: 9443
+portainer_admin_password_default: passwordpassword
+portainer_password_file_path_linux: "/opt/portainer/"
+portainer_password_file_path_win: 'C:\Users\ansible\AppData\Roaming\portainer'
+portainer_local_endpoint_url_linux: /var/run/docker.sock
+portainer_local_endpoint_url_win: '\\.\pipe\docker_engine'

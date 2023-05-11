@@ -1,0 +1,41 @@
+---
+- name: "Create inventory with target host(s)"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Use inventory Helper to setup ansible inventory
+      ansible.builtin.include_role:
+        name: inventory_helper
+
+- name: Install docker and portainer
+  hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: "Include docker - install"
+      ansible.builtin.include_role:
+        name: "docker"
+        tasks_from: install.yml
+
+    - name: "Include portainer - install"
+      ansible.builtin.include_role:
+        name: "setup"
+      vars:
+        portainer_admin_password: "{{ (vault_service_secrets | from_json).portainer_password }}"
+        portainer_port: "{{ (consul_service_meta | from_json).service_port }}"
+
+- name: Setup Portainer (Windows-only)
+  hosts: all
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+  tasks:
+    - name: Include setup_local_endpoint
+      when: ansible_os_family == "Windows"
+      ansible.builtin.include_role:
+        name: setup
+        tasks_from: setup_local_endpoint.yml

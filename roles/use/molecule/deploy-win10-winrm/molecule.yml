@@ -1,0 +1,42 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: win10-winrm
+    template_name: windows-10-docker
+    groups: ["winrm"]
+    vm_num_cpus: 4
+    vm_num_cpu_cores_per_socket: 2
+    vm_memory_mb: 8192
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../setup/molecule/default/create.yml
+    prepare: ../../../setup/molecule/default-install/converge.yml
+    destroy: ../../../setup/molecule/default/destroy.yml
+    converge: ../default-deploy/converge.yml
+    verify: ../default-deploy/verify.yml
+  inventory:
+    group_vars:
+      all:
+        ansible_become_method: runas
+        ansible_become_user: ansible
+        ansible_become_password: password
+      winrm:
+        ansible_connection: psrp
+        ansible_port: 5986
+        ansible_winrm_transport: credssp
+        ansible_winrm_read_timeout_sec: 360
+        ansible_winrm_operation_timeout_sec: 120
+        ansible_winrm_server_cert_validation: ignore
+        ansible_psrp_port: 5986
+        ansible_psrp_connection_timeout: 30
+        ansible_psrp_operation_timeout: 120
+        ansible_psrp_read_timeout: 360
+        ansible_psrp_reconnection_retries: 2
+        ansible_psrp_cert_validation: ignore
+        ansible_psrp_reconnection_retries: 10
+verifier:
+  name: ansible

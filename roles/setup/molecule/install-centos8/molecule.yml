@@ -1,0 +1,18 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: centos8
+    template_name: centos-stream-8
+    groups: ['ssh']
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../default/create.yml
+    destroy: ../default/destroy.yml
+    converge: ../default-install/converge.yml
+    verify: ../default-install/verify.yml
+verifier:
+  name: ansible

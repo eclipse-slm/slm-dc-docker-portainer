@@ -1,0 +1,31 @@
+---
+- name: Converge - Update
+  hosts: all
+  gather_facts: yes
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+  tasks:
+    - name: Include vars file
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - ./vars/main.yml
+        - ../../../setup/defaults/main.yml
+
+    - name: "Include use - update (service-1)"
+      ansible.builtin.include_role:
+        name: "use"
+        tasks_from: update.yml
+      vars:
+        docker_compose_file: "{{ docker_compose_file_1_update }}"
+        service_id: "{{ service_id_1 }}"
+
+    - name: "Include use - update (service-2)"
+      ansible.builtin.include_role:
+        name: "use"
+        tasks_from: update.yml
+      vars:
+        docker_compose_file: "{{ docker_compose_file_2_update }}"
+        service_id: "{{ service_id_2 }}"

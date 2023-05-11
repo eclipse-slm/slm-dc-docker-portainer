@@ -1,0 +1,69 @@
+{
+  "capabilityClass": "DeploymentCapability",
+  "name": "Portainer",
+  "logo": "mdi-alpha-p-box",
+  "type": [
+    "SETUP",
+    "DEPLOY"
+  ],
+  "connection": "http",
+  "actions": {
+    "DEPLOY": {
+      "capabilityActionClass": "AwxCapabilityAction",
+      "capabilityActionType": "DEPLOY",
+      "awxRepo": "https://github.com/FabOS-AI/fabos-slm-dc-docker-portainer",
+      "awxBranch": "main",
+      "playbook": "deploy.yml",
+      "connectionTypes": ["http"]
+    },
+    "UNINSTALL": {
+      "capabilityActionClass": "AwxCapabilityAction",
+      "capabilityActionType": "UNINSTALL",
+      "awxRepo": "https://github.com/FabOS-AI/fabos-slm-dc-docker-portainer",
+      "awxBranch": "main",
+      "playbook": "uninstall.yml",
+      "connectionTypes": ["ssh", "WinSsh"]
+    },
+    "INSTALL": {
+      "capabilityActionClass": "AwxCapabilityAction",
+      "capabilityActionType": "INSTALL",
+      "awxRepo": "https://github.com/FabOS-AI/fabos-slm-dc-docker-portainer",
+      "awxBranch": "main",
+      "playbook": "install.yml",
+      "connectionTypes": ["ssh", "WinSsh"],
+      "skipable": true,
+      "configParameters": [
+        {
+          "name": "portainer_password",
+          "prettyName": "Password",
+          "description": "Password for admin user",
+          "valueType": "STRING",
+          "requiredType": "ALWAYS",
+          "secret": true
+        },
+        {
+          "name": "service_port",
+          "prettyName": "Service Port",
+          "description": "",
+          "defaultValue": "9443",
+          "valueType": "SERVICE_PORT",
+          "requiredType": "ALWAYS",
+          "secret": false
+        }
+      ]
+    },
+    "UNDEPLOY": {
+      "capabilityActionClass": "AwxCapabilityAction",
+      "capabilityActionType": "UNDEPLOY",
+      "awxRepo": "https://github.com/FabOS-AI/fabos-slm-dc-docker-portainer",
+      "awxBranch": "main",
+      "playbook": "undeploy.yml",
+      "connectionTypes": ["http"]
+    }
+  },
+  "supportedDeploymentTypes": [
+    "DOCKER_CONTAINER",
+    "DOCKER_COMPOSE"
+  ],
+  "clusterMemberTypes": []
+}

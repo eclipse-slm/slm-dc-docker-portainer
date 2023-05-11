@@ -1,0 +1,19 @@
+- name: Verify - docker_portainer - install
+  hosts: all
+  gather_facts: yes
+  become: no
+  tasks:
+    - name: Include default vars from setup role
+      ansible.builtin.include_vars: ../../defaults/main.yml
+
+    - name: Wait for portainer port to become open (Linux)
+      when: ansible_os_family != "Windows"
+      ansible.builtin.wait_for:
+        port: "{{ portainer_port | default(portainer_port_default) }}"
+        delay: 10
+
+    - name: Wait for portainer port to become open (Windows)
+      when: ansible_os_family == "Windows"
+      ansible.windows.win_wait_for:
+        port: "{{ portainer_port | default(portainer_port_default) }}"
+        delay: 10

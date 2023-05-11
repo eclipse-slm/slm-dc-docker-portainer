@@ -1,0 +1,95 @@
+---
+- name: Install Portainer on Linux
+  when: ansible_os_family != "Windows"
+  block:
+    - name: "Add iptable rule for portainer ports"
+      ansible.builtin.iptables:
+        action: append
+        chain: INPUT
+        protocol: tcp
+        destination_port: "{{ item }}"
+        ctstate: ["NEW", "ESTABLISHED"]
+        match: ["conntrack"]
+        jump: "ACCEPT"
+      with_items:
+        - "8000"
+        - "{{ portainer_port | default(portainer_port_default) }}"
+
+    - name: Set Portainer Password File Path
+      ansible.builtin.set_fact:
+        portainer_password_file_path: "{{ portainer_password_file_path_linux }}"
+        portainer_local_endpoint_url: "{{ portainer_local_endpoint_url_linux }}"
+
+    - name: "Get stat of portainer's data folder"
+      ansible.builtin.stat:
+        path: "{{ portainer_password_file_path }}/data"
+      register: stat_data_folder
+
+    - name: "Create portainer's data folder"
+      when: not stat_data_folder.stat.exists
+      ansible.builtin.file:
+        path: "{{ portainer_password_file_path }}/data"
+        state: directory
+        mode: 644
+        recurse: yes
+
+    - name: "Copy password file"
+      ansible.builtin.template:
+        src: portainer_password.j2
+        dest: "{{ portainer_password_file_path }}/data/password"
+        mode: 644
+
+    - name: docker-compose up
+      community.docker.docker_compose:
+        definition: "{{ lookup('template', 'docker-compose.yml.j2') | from_yaml }}"
+        project_name: "portainer"
+        state: present
+
+
+- name: Install Portainer on Windows
+  when: ansible_os_family == "Windows"
+  block:
+    - name: Add firewall rule for ports
+      community.windows.win_firewall_rule:
+        name: "Portainer - {{ item }}"
+        localport: "{{ item }}"
+        action: allow
+        direction: in
+        protocol: tcp
+        state: present
+        enabled: yes
+      loop:
+        - "8000"
+        - "{{ portainer_port | default(portainer_port_default) }}"
+
+    - name: Set Portainer vars
+      ansible.builtin.set_fact:
+        portainer_password_file_path: "{{ portainer_password_file_path_win }}"
+        portainer_local_endpoint_url: "{{ portainer_local_endpoint_url_win }}"
+
+    - name: "Create portainer's data folder"
+      ansible.windows.win_file:
+        state: directory
+        path: "{{ portainer_password_file_path }}/data"
+      async: 30
+      poll: 3
+
+    - name: "Copy password file"
+      ansible.windows.win_template:
+        src: portainer_password.j2
+        dest: "{{ portainer_password_file_path }}/data/password"
+
+    - name: Upload docker-compose file
+      ansible.windows.win_template:
+        src: docker-compose-win.yml.j2
+        dest: "{{ portainer_password_file_path }}/docker-compose.yml"
+
+    - name: docker-compose up (Windows)
+      ansible.windows.win_command: docker compose up -d
+      args:
+        chdir: "{{ portainer_password_file_path }}"
+      changed_when: "'Starting' in docker_compose.stderr"
+      register: docker_compose
+      retries: 5
+      delay: 5
+      until: docker_compose.failed == false

@@ -1,0 +1,30 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: ubuntu1804
+    template_name: ubuntu-18-04
+
+  - name: ubuntu2004
+    template_name: ubuntu-20-04
+
+  - name: ubuntu2204
+    template_name: ubuntu-22-04
+
+  - name: centos7
+    template_name: centos-7
+
+  - name: centos8
+    template_name: centos-stream-8
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../setup/molecule/default/create.yml
+    prepare: ../default-update/prepare.yml
+    destroy: ../../../setup/molecule/default/destroy.yml
+    converge: ../default-update/converge.yml
+    verify: ../default-update/verify.yml
+verifier:
+  name: ansible

@@ -1,0 +1,93 @@
+---
+- name: Prepare - Install
+  hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Check if windows host
+      ansible.builtin.set_fact:
+        is_win_host: "{{ 'win-ssh' in group_names or 'winrm' in group_names }}"
+
+    - name: "Include docker - install"
+      when: not is_win_host
+      ansible.builtin.include_role:
+        name: "docker"
+
+    - name: "Include docker_portainer - setup"
+      ansible.builtin.include_role:
+        name: "setup"
+
+- name: Prepare - Setup Portainer
+  hosts: all
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+  tasks:
+    - name: Include setup_local_endpoint
+      when: ansible_os_family == "Windows"
+      ansible.builtin.include_role:
+        name: setup
+        tasks_from: setup_local_endpoint.yml
+
+- name: Prepare - Deploy Services
+  hosts: all
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Include vars file
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - ./vars/main.yml
+        - ../../../setup/defaults/main.yml
+
+    - name: Check if windows host
+      ansible.builtin.set_fact:
+        is_win_host: "{{ 'win-ssh' in group_names or 'winrm' in group_names }}"
+
+    - name: Prepare Linux Host
+      when: not is_win_host
+      block:
+        - name: "Include use - deploy (service-1)"
+          include_role:
+            name: "use"
+            tasks_from: deploy.yml
+          vars:
+            service_id: "{{ service_id_1 }}"
+            docker_compose_file: "{{ docker_compose_file_1 }}"
+
+        - name: "Include use - deploy (service-2)"
+          include_role:
+            name: "use"
+            tasks_from: deploy.yml
+          vars:
+            service_id: "{{ service_id_2 }}"
+            docker_compose_file: "{{ docker_compose_file_2 }}"
+
+
+    - name: Prepare Windows Host
+      when: is_win_host
+      block:
+        - name: "Include use - deploy (service-1)"
+          include_role:
+            name: "use"
+            tasks_from: deploy.yml
+          vars:
+            service_id: "{{ service_id_1 }}"
+            docker_compose_file: "{{ docker_compose_file_1_win }}"
+
+#        - name: "Include use - deploy (service-2)"
+#          include_role:
+#            name: "use"
+#            tasks_from: deploy.yml
+#          vars:
+#            service_id: "{{ service_id_2 }}"
+#            docker_compose_file: "{{ docker_compose_file_2_win }}"

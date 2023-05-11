@@ -1,0 +1,18 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: ubuntu2204
+    template_name: ubuntu-22-04
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../setup/molecule/default/create.yml
+    prepare: ../default-undeploy/prepare.yml
+    destroy: ../../../setup/molecule/default/destroy.yml
+    converge: ../default-undeploy/converge.yml
+    verify: ../default-undeploy/verify.yml
+verifier:
+  name: ansible

@@ -1,0 +1,26 @@
+---
+- name: "Create inventory with target host(s)"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Use inventory Helper to setup ansible inventory
+      ansible.builtin.include_role:
+        name: inventory_helper
+
+- name: Deploy
+  hosts: all
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+  tasks:
+    - name: "Include use - deploy"
+      ansible.builtin.include_role:
+        name: "use"
+        tasks_from: deploy.yml
+      vars:
+        portainer_admin_password: "{{ vault_service_secrets.portainer_password }}"
+        portainer_port: "{{ consul_service_meta.service_port }}"

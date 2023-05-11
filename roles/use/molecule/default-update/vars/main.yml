@@ -1,0 +1,10 @@
+---
+service_id_1: 1d7905ad-b3f7-49fb-b8a2-e0b697be8da7
+docker_compose_file_1: "{{ lookup('file', './files/docker-compose.yml') | from_yaml }}"
+docker_compose_file_1_update: "{{ lookup('file', './files/docker-compose-update.yml') | from_yaml }}"
+docker_compose_file_1_win: "{{ lookup('file', './files/docker-compose-1-win.yml') | from_yaml }}"
+
+service_id_2: db7b2164-1854-4c43-bd3e-748c2d92511a
+docker_compose_file_2: "{{ lookup('file', './files/docker-compose-2-services.yml') | from_yaml }}"
+docker_compose_file_2_update: "{{ lookup('file', './files/docker-compose-2-services-update.yml') | from_yaml }}"
+docker_compose_file_2_win: "{{ lookup('file', './files/docker-compose-2-win.yml') | from_yaml }}"

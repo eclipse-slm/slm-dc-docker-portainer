@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: win10-ssh
+    template_name: windows-10-docker
+    groups: ["win-ssh"]
+    vm_num_cpus: 4
+    vm_num_cpu_cores_per_socket: 2
+    vm_memory_mb: 8192
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../default/create.yml
+    prepare: ../default-install/converge.yml
+    destroy: ../default/destroy.yml
+    converge: ../default-uninstall/converge.yml
+    verify: ../default-uninstall/verify.yml
+  inventory:
+    group_vars:
+      all:
+        ansible_become_method: runas
+        ansible_become_user: ansible
+        ansible_become_password: password
+      win-ssh:
+        ansible_connection: ssh
+        ansible_shell_type: powershell
+        ansible_port: 22
+        ansible_ssh_user: ansible
+        ansible_ssh_password: password
+        ansible_ssh_port: 22
+        ansible_ssh_common_args: '-o ServerAliveInterval=10'
+        ansible_ssh_retries: 10
+verifier:
+  name: ansible

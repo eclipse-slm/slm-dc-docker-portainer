@@ -1,0 +1,17 @@
+---
+version: '3'
+
+services:
+  service-1:
+    image: 'hello-world'
+    command: ping -t localhost
+
+  service-2:
+    image: 'hello-world'
+    command: ping -t localhost
+    volumes:
+      - 'users_public:C:\Users\Public'
+
+volumes:
+  users_public:
+    driver: local

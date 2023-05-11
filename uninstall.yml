@@ -1,0 +1,25 @@
+---
+- name: "Create inventory with target host(s)"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Use inventory Helper to setup ansible inventory
+      ansible.builtin.include_role:
+        name: inventory_helper
+
+- name: Converge - Uninstall
+  hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: "Include docker_portainer - setup"
+      ansible.builtin.include_role:
+        name: "setup"
+        tasks_from: uninstall_portainer.yml
+
+    - name: "Include docker - uninstall"
+      ansible.builtin.include_role:
+        name: "docker"
+        tasks_from: uninstall.yml
+

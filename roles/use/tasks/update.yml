@@ -1,0 +1,69 @@
+---
+- name: Set Portainer url
+  ansible.builtin.set_fact:
+    portainer_url: "https://{{ ansible_host }}:{{ portainer_port | default(portainer_port_default) }}"
+
+- name: Get jwt token
+  ansible.builtin.uri:
+    url: "{{ portainer_url }}/api/auth"
+    method: POST
+    body_format: json
+    body:
+      username: "admin"
+      password: "{{ portainer_admin_password | default(portainer_admin_password_default) }}"
+    validate_certs: false
+  register: get_jwt_token_response
+
+- name: Get endpoints
+  ansible.builtin.uri:
+    url: "{{ portainer_url }}/api/endpoints?name=primary"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ get_jwt_token_response.json.jwt }}"
+    validate_certs: false
+  register: get_endpoints_result
+
+- name: Set Primary endpoint var
+  ansible.builtin.set_fact:
+    portainer_endpoint: "{{ get_endpoints_result.json | first }}"
+
+- name: Set docker-compose string
+  ansible.builtin.set_fact:
+    docker_compose_string: "{{ docker_compose_file | to_yaml | string }}"
+
+- name: Get Stacks
+  ansible.builtin.uri:
+    url: "{{ portainer_url }}/api/stacks"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ get_jwt_token_response.json.jwt }}"
+    validate_certs: false
+  register: get_stacks_result
+
+- name: Set Stacks var
+  ansible.builtin.set_fact:
+    stacks: "{{ get_stacks_result.json }}"
+
+- name: Get Stack
+  ansible.builtin.set_fact:
+    stack: "{{ stacks | selectattr('Name', '==', service_id) | first | default([]) }}"
+  ignore_errors: true
+
+- name: "Update stack with id = {{ service_id }} in evironment with id = {{ portainer_endpoint.Id }}"
+  ansible.builtin.uri:
+    url: "{{ portainer_url }}/api/stacks/{{ stack.Id }}?endpointId={{ portainer_endpoint.Id }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ get_jwt_token_response.json.jwt }}"
+    body_format: json
+    body:
+      prune: false
+      pullImage: true
+      stackFileContent: "{{ docker_compose_string }}"
+    status_code: [200, 409]
+    timeout: 600
+    validate_certs: false
+  register: create_stack_response
+  until: not create_stack_response.failed
+  retries: 5
+  changed_when: create_stack_response.status == 200

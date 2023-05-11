@@ -1,0 +1,9 @@
+---
+# tasks file for setup
+- name: Run install portainer
+  when: state | default("present") != "absent"
+  ansible.builtin.include_tasks: install_portainer.yml
+
+- name: Run uninstall portainer
+  when: state | default("present") == "absent"
+  ansible.builtin.include_tasks: uninstall_portainer.yml
