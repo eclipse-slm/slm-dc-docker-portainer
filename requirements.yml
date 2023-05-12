@@ -1,6 +1,6 @@
 ---
 roles:
-  - src: "git+https://github.com/FabOS-AI/molecule_vsphere.git"
+  - src: "git+https://github.com/eclipse-slm/molecule_vsphere"
     scm: git
     version: main
     name: molecule_vsphere
