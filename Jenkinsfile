@@ -54,7 +54,7 @@ for (kv in mapToList(scenarios)) {
 
     parallel_stages[platform] = {
 
-        docker.image('fabos4ai/molecule:4.0.4').inside('-u root') {
+        docker.image("${MOLECULE_DOCKER_IMAGE}").inside('-u root') {
 
             stage("Install dependencies") {
                 sh "ansible-galaxy install -f -r requirements.yml"
