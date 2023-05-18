@@ -1,6 +1,6 @@
 ---
 - name: Converge - deploy
-  hosts: all
+  hosts: all:!portainer:!nodered
   connection: local
   gather_facts: no
   become: no
