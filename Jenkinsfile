@@ -76,7 +76,7 @@ for (kv in mapToList(scenarios)) {
     }
 }
 
-parallel_stages["node-red"] {
+parallel_stages["node-red"] = {
     docker.image("${MOLECULE_DOCKER_IMAGE}").inside('-u root') {
         stage("Install dependencies") {
             sh "ansible-galaxy install -f -r requirements.yml"
