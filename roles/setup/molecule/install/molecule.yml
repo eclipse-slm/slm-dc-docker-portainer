@@ -4,6 +4,14 @@ dependency:
 driver:
   name: delegated
 platforms:
+  - name: nodered-nodered
+    template_name: ubuntu-22-04-docker
+    groups: ['nodered']
+
+  - name: nodered-portainer
+    template_name: ubuntu-22-04
+    groups: ['portainer']
+
   - name: ubuntu1804
     template_name: ubuntu-18-04
     groups: ['ssh']
