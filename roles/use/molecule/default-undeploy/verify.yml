@@ -1,7 +1,7 @@
 ---
 # This is an example playbook to execute Ansible tests.
 - name: Verify
-  hosts: all
+  hosts: all:!nodered
   connection: local
   gather_facts: no
   become: no
