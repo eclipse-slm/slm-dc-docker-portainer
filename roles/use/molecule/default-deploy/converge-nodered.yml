@@ -1,0 +1,40 @@
+---
+- name: Converge - deploy (nodered)
+  hosts: nodered
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+  tasks:
+    - name: Include vars file
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - ./vars/main.yml
+        - ../../../setup/defaults/main.yml
+
+    - name: Get portainer host
+      ansible.builtin.set_fact:
+        portainer_host_name: "{{ groups['portainer'] | first }}"
+
+    - name: Get ip address of portainer host
+      ansible.builtin.set_fact:
+        portainer_ip_address: "{{ hostvars[portainer_host_name].ansible_host }}"
+
+    - name: Run nodered flow deploy.json
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host }}:1880/deploy"
+        method: POST
+        body_format: json
+        body:
+          portainer_host: "{{ portainer_ip_address }}"
+          portainer_port: "{{ portainer_port_default }}"
+          portainer_user: admin
+          portainer_password: "{{ portainer_admin_password_default }}"
+          service_id: "{{ service_id }}"
+          docker_compose_string: "{{ docker_compose_file | to_yaml | string }}"
+        validate_certs: false
+        status_code: [200, 201]
+      register: run_nodered_flow
+      changed_when: run_nodered_flow.status == 201

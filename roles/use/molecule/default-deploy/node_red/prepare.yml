@@ -1,0 +1,63 @@
+---
+- name: Converge - Install
+  hosts: all:!nodered
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Check if windows host
+      ansible.builtin.set_fact:
+        is_win_host: "{{ 'win-ssh' in group_names or 'winrm' in group_names }}"
+
+    - name: "Include docker - install"
+      when: not is_win_host
+      ansible.builtin.include_role:
+        name: "docker"
+
+    - name: "Include docker_portainer - setup"
+      ansible.builtin.include_role:
+        name: "setup"
+
+- name: Setup Portainer (Windows-only)
+  hosts: all:!nodered
+  connection: local
+  gather_facts: no
+  become: no
+  vars:
+    ansible_connection: local
+    ansible_shell_type: sh
+  tasks:
+    - name: Include setup_local_endpoint
+      when: ansible_os_family == "Windows"
+      ansible.builtin.include_role:
+        name: setup
+        tasks_from: setup_local_endpoint.yml
+
+- name: Install nodered
+  hosts: nodered
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: "Start node-red via Docker Compose"
+      community.docker.docker_compose:
+        state: "present"
+        project_name: "nodered"
+        definition: "{{ lookup('file', './docker-compose.yml') | from_yaml }}"
+      register: docker_compose
+      retries: 5
+      delay: 5
+      until: docker_compose.failed == false
+
+    - name: Import deploy flow
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host }}:1880/flow"
+        method: POST
+        body_format: json
+        body:
+          label: "/deploy"
+          nodes: "{{ lookup('file', '../../../../../deploy.json' ) | from_json }}"
+      register: import_nodered_flow
+      failed_when:
+        - import_nodered_flow.status != 200
+        - "import_nodered_flow.json.message != 'duplicate id'"
+      delegate_to: localhost
+

@@ -1,0 +1,14 @@
+---
+version: '3'
+services:
+  node-red:
+    image: nodered/node-red
+    environment:
+      - TZ=Europe/Amsterdam
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    ports:
+      - "1880:1880"
+    volumes:
+      - node-red-data:/data
+volumes:
+  node-red-data:

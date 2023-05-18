@@ -1,0 +1,22 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: nodered
+    template_name: ubuntu-22-04-docker
+    groups: ['nodered']
+  - name: ubuntu2204
+    template_name: ubuntu-22-04
+    groups: ['portainer']
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../setup/molecule/default/create.yml
+    prepare: ../default-deploy/node_red/prepare.yml
+    destroy: ../../../setup/molecule/default/destroy.yml
+    converge: ../default-deploy/converge-nodered.yml
+    verify: ../default-deploy/verify.yml
+verifier:
+  name: ansible
