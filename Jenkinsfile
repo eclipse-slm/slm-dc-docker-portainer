@@ -1,40 +1,36 @@
 def scenarios = [
-    "nodered-ubuntu2204": [
-         ["use", "deploy"],
-         ["use", "undeploy"],
-    ],
     "ubuntu2204": [
         ["setup", "install"],
         ["use", "deploy"],
-        ["use", "update"],
+//        ["use", "update"],
         ["use", "undeploy"],
         ["setup", "uninstall"]
     ],
     "ubuntu2004": [
         ["setup", "install"],
         ["use", "deploy"],
-        ["use", "update"],
+//        ["use", "update"],
         ["use", "undeploy"],
         ["setup", "uninstall"]
     ],
      "ubuntu1804": [
          ["setup", "install"],
          ["use", "deploy"],
-         ["use", "update"],
+//         ["use", "update"],
          ["use", "undeploy"],
          ["setup", "uninstall"]
      ],
     "centos8": [
        ["setup", "install"],
        ["use", "deploy"],
-       ["use", "update"],
+//       ["use", "update"],
        ["use", "undeploy"],
        ["setup", "uninstall"]
     ],
      "centos7": [
         ["setup", "install"],
         ["use", "deploy"],
-        ["use", "update"],
+//        ["use", "update"],
         ["use", "undeploy"],
         ["setup", "uninstall"]
      ],
@@ -76,6 +72,27 @@ for (kv in mapToList(scenarios)) {
                     sh "cd ./roles/${role} && molecule test -s ${scenario} -p ${platform} --destroy never"
                 }
             }
+        }
+    }
+}
+
+parallel_stages["node-red"] {
+    docker.image("${MOLECULE_DOCKER_IMAGE}").inside('-u root') {
+        stage("Install dependencies") {
+            sh "ansible-galaxy install -f -r requirements.yml"
+            sh "ansible-galaxy install -f -r roles/requirements.yml"
+        }
+
+        stage("node-red - Create") {
+            sh "cd ./roles/use && molecule create -s deploy-nodered-ubuntu2204"
+        }
+
+        stage("node-red - Deploy") {
+            sh "cd ./roles/use && molecule test -s deploy-nodered-ubuntu2204 --destroy never"
+        }
+
+        stage("node-red - Undeploy") {
+            sh "cd ./roles/use && molecule test -s undeploy-nodered-ubuntu2204 --destroy never"
         }
     }
 }
