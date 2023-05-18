@@ -1,4 +1,8 @@
 def scenarios = [
+    "nodered-ubuntu2204": [
+         ["use", "deploy"],
+         ["use", "undeploy"],
+    ],
     "ubuntu2204": [
         ["setup", "install"],
         ["use", "deploy"],
