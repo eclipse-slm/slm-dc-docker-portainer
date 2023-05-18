@@ -47,6 +47,11 @@
       delay: 5
       until: docker_compose.failed == false
 
+    - name: Wait for nodered port
+      ansible.builtin.wait_for:
+        port: 1880
+        delay: 5
+
     - name: Import deploy flow
       ansible.builtin.uri:
         url: "http://{{ ansible_host }}:1880/flow"
