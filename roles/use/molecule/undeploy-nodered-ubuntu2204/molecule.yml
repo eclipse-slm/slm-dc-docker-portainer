@@ -4,10 +4,10 @@ dependency:
 driver:
   name: delegated
 platforms:
-  - name: nodered
+  - name: nodered-nodered
     template_name: ubuntu-22-04-docker
     groups: ['nodered']
-  - name: ubuntu2204
+  - name: nodered-portainer
     template_name: ubuntu-22-04
     groups: ['portainer']
 provisioner:
