@@ -1,0 +1,19 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: delegated
+platforms:
+  - name: nodered-nodered
+    template_name: ubuntu-22-04-docker
+    groups: ['nodered']
+  - name: nodered-portainer
+    template_name: ubuntu-22-04
+    groups: ['portainer']
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../default/create.yml
+    destroy: ../default/destroy.yml
+verifier:
+  name: ansible
