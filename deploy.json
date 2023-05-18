@@ -1,0 +1,386 @@
+[
+  {
+    "id": "8ab913d4058eb25d",
+    "type": "http in",
+    "z": "f6f2187d.f17ca8",
+    "name": "/deploy",
+    "url": "/deploy",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 70,
+    "y": 180,
+    "wires": [
+      [
+        "8d47011014b711a5"
+      ]
+    ]
+  },
+  {
+    "id": "3c69bf09e60f92d6",
+    "type": "http request",
+    "z": "f6f2187d.f17ca8",
+    "name": "POST /api/auth",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 860,
+    "y": 180,
+    "wires": [
+      [
+        "51336343058f5398"
+      ]
+    ]
+  },
+  {
+    "id": "8d47011014b711a5",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set portainer base url, user/pw",
+    "func": "var portainer_base_url = \"https://\" + msg.payload.portainer_host + \":\" + msg.payload.portainer_port || \"no address\"\n\nflow.set('portainer_base_url', portainer_base_url)\nflow.set('portainer_user', msg.payload.portainer_user)\nflow.set('portainer_password', msg.payload.portainer_password)\nflow.set('service_id', msg.payload.service_id)\nflow.set('docker_compose_string', msg.payload.docker_compose_string)\n\nmsg.payload.portainer_url = portainer_base_url\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 290,
+    "y": 180,
+    "wires": [
+      [
+        "264dfaa4c6d7eb3b"
+      ]
+    ]
+  },
+  {
+    "id": "51336343058f5398",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set portainer jwt token",
+    "func": "var portainer_jwt = msg.payload.jwt || \"no jwt\"\n\nflow.set('portainer_jwt', portainer_jwt)\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1080,
+    "y": 180,
+    "wires": [
+      [
+        "a7395771ba20bb37"
+      ]
+    ]
+  },
+  {
+    "id": "264dfaa4c6d7eb3b",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set params for POST /api/auth",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/auth\"\nmsg.method = 'POST'\nmsg.payload = {\n    'username': flow.get('portainer_user'),\n    'password': flow.get('portainer_password')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 610,
+    "y": 180,
+    "wires": [
+      [
+        "3c69bf09e60f92d6"
+      ]
+    ]
+  },
+  {
+    "id": "a7395771ba20bb37",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set params for GET /api/endpoints",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/endpoints?name=primary\"\nmsg.method = 'GET'\nmsg.headers = {\n    \"Authorization\": \"Bearer \"+flow.get('portainer_jwt')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1380,
+    "y": 180,
+    "wires": [
+      [
+        "4d3b4937da31b6ea"
+      ]
+    ]
+  },
+  {
+    "id": "4d3b4937da31b6ea",
+    "type": "http request",
+    "z": "f6f2187d.f17ca8",
+    "name": "GET /api/endpoints",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 1650,
+    "y": 180,
+    "wires": [
+      [
+        "4f6588104e72a0da"
+      ]
+    ]
+  },
+  {
+    "id": "4f6588104e72a0da",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set portainer endpoint id",
+    "func": "var portainer_endpoint_id = msg.payload[0].Id || \"no portainer endpoint id\"\n\nflow.set('portainer_endpoint_id', portainer_endpoint_id)\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1890,
+    "y": 180,
+    "wires": [
+      [
+        "fb5c8eaaed6b2abe"
+      ]
+    ]
+  },
+  {
+    "id": "fb5c8eaaed6b2abe",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set params for GET /api/stacks",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/stacks\"\nmsg.method = 'GET'\nmsg.headers = {\n    \"Authorization\": \"Bearer \"+flow.get('portainer_jwt')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 2190,
+    "y": 180,
+    "wires": [
+      [
+        "db281f44fb60fcc7"
+      ]
+    ]
+  },
+  {
+    "id": "db281f44fb60fcc7",
+    "type": "http request",
+    "z": "f6f2187d.f17ca8",
+    "name": "GET /api/stacks",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 2460,
+    "y": 180,
+    "wires": [
+      [
+        "13bed82af9b2834f"
+      ]
+    ]
+  },
+  {
+    "id": "7dfd91729481af80",
+    "type": "debug",
+    "z": "f6f2187d.f17ca8",
+    "name": "stack created",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 3910,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "13bed82af9b2834f",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set portainer stacks before",
+    "func": "var portainer_stacks = msg.payload || []\n\nflow.set('portainer_stacks', portainer_stacks)\n\nvar find_result = portainer_stacks.find(stack => stack.Name === flow.get('service_id'))\n\nif(find_result === undefined) {\n    msg.found = false \n} else {\n    msg.found = true\n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 2720,
+    "y": 180,
+    "wires": [
+      [
+        "ce901fa64649f5d0"
+      ]
+    ]
+  },
+  {
+    "id": "062defda08e5a5b5",
+    "type": "function",
+    "z": "f6f2187d.f17ca8",
+    "name": "set params for POST /api/stacks",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/stacks?type=2&method=string&endpointId=\"+flow.get('portainer_endpoint_id')\nmsg.method = 'POST'\nmsg.headers = {\n    \"Authorization\": \"Bearer \"+flow.get('portainer_jwt')\n}\nmsg.payload = {\n    \"fromAppTemplate\": false,\n    \"name\": flow.get(\"service_id\"),\n    \"stackFileContent\": flow.get(\"docker_compose_string\")\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3370,
+    "y": 120,
+    "wires": [
+      [
+        "39907dbb013dd996"
+      ]
+    ]
+  },
+  {
+    "id": "39907dbb013dd996",
+    "type": "http request",
+    "z": "f6f2187d.f17ca8",
+    "name": "POST /api/stacks",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 3670,
+    "y": 120,
+    "wires": [
+      [
+        "7dfd91729481af80",
+        "a6a256f8f1827bb1"
+      ]
+    ]
+  },
+  {
+    "id": "ce901fa64649f5d0",
+    "type": "switch",
+    "z": "f6f2187d.f17ca8",
+    "name": "is stack found ?",
+    "property": "found",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "false"
+      },
+      {
+        "t": "true"
+      }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 2,
+    "x": 3020,
+    "y": 180,
+    "wires": [
+      [
+        "062defda08e5a5b5"
+      ],
+      [
+        "bf5880dc13b3f34c",
+        "41e630f5b9bd75b5"
+      ]
+    ],
+    "outputLabels": [
+      "stack was not found",
+      "stack was found"
+    ]
+  },
+  {
+    "id": "bf5880dc13b3f34c",
+    "type": "debug",
+    "z": "f6f2187d.f17ca8",
+    "name": "dont create stack",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 3330,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "a6a256f8f1827bb1",
+    "type": "http response",
+    "z": "f6f2187d.f17ca8",
+    "name": "created",
+    "statusCode": "201",
+    "headers": {},
+    "x": 3900,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "41e630f5b9bd75b5",
+    "type": "http response",
+    "z": "f6f2187d.f17ca8",
+    "name": "ok",
+    "statusCode": "200",
+    "headers": {},
+    "x": 3290,
+    "y": 260,
+    "wires": []
+  }
+]

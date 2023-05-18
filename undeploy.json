@@ -1,0 +1,386 @@
+[
+  {
+    "id": "84225e0a98475a94",
+    "type": "http in",
+    "z": "7b4414036a759f67",
+    "name": "/undeploy",
+    "url": "/undeploy",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 151.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "a78e47d3b82b62d6"
+      ]
+    ]
+  },
+  {
+    "id": "8c221646c713e90c",
+    "type": "http request",
+    "z": "7b4414036a759f67",
+    "name": "POST /api/auth",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 931.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "2aeab5cbc086bbb7"
+      ]
+    ]
+  },
+  {
+    "id": "a78e47d3b82b62d6",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set portainer base url, user/pw",
+    "func": "var portainer_base_url = \"https://\" + msg.payload.portainer_host + \":\" + msg.payload.portainer_port || \"no address\"\n\nflow.set('portainer_base_url', portainer_base_url)\nflow.set('portainer_user', msg.payload.portainer_user)\nflow.set('portainer_password', msg.payload.portainer_password)\nflow.set('service_id', msg.payload.service_id)\nflow.set('docker_compose_string', msg.payload.docker_compose_string)\n\nmsg.payload.portainer_url = portainer_base_url\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 361.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "9ff84f66f0fa4190"
+      ]
+    ]
+  },
+  {
+    "id": "2aeab5cbc086bbb7",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set portainer jwt token",
+    "func": "var portainer_jwt = msg.payload.jwt || \"no jwt\"\n\nflow.set('portainer_jwt', portainer_jwt)\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1151.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "fbb4de5976d38942"
+      ]
+    ]
+  },
+  {
+    "id": "9ff84f66f0fa4190",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set params for POST /api/auth",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/auth\"\nmsg.method = 'POST'\nmsg.payload = {\n    'username': flow.get('portainer_user'),\n    'password': flow.get('portainer_password')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 681.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "8c221646c713e90c"
+      ]
+    ]
+  },
+  {
+    "id": "fbb4de5976d38942",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set params for GET /api/endpoints",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/endpoints?name=primary\"\nmsg.method = 'GET'\nmsg.headers = {\n    \"Authorization\": \"Bearer \"+flow.get('portainer_jwt')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1451.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "a4060a1f264cad2c"
+      ]
+    ]
+  },
+  {
+    "id": "a4060a1f264cad2c",
+    "type": "http request",
+    "z": "7b4414036a759f67",
+    "name": "GET /api/endpoints",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 1721.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "d6d35a52d309fbcd"
+      ]
+    ]
+  },
+  {
+    "id": "d6d35a52d309fbcd",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set portainer endpoint id",
+    "func": "var portainer_endpoint_id = msg.payload[0].Id || \"no portainer endpoint id\"\n\nflow.set('portainer_endpoint_id', portainer_endpoint_id)\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1961.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "fd74fc4f95e14a3a"
+      ]
+    ]
+  },
+  {
+    "id": "fd74fc4f95e14a3a",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set params for GET /api/stacks",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/stacks\"\nmsg.method = 'GET'\nmsg.headers = {\n    \"Authorization\": \"Bearer \"+flow.get('portainer_jwt')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 2261.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "0f4b75f7c9afc407"
+      ]
+    ]
+  },
+  {
+    "id": "0f4b75f7c9afc407",
+    "type": "http request",
+    "z": "7b4414036a759f67",
+    "name": "GET /api/stacks",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 2531.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "de5717619bb64fc8"
+      ]
+    ]
+  },
+  {
+    "id": "de5717619bb64fc8",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set portainer stack id",
+    "func": "var portainer_stacks = msg.payload || []\nmsg.stack = portainer_stacks\nmsg.service_id = flow.get('service_id')\n\nflow.set('portainer_stacks', portainer_stacks)\n\nvar find_result = portainer_stacks.find(stack => stack.Name === flow.get('service_id'))\n\nif(find_result == undefined) {\n    msg.found = false \n} else {\n    msg.found = true\n    msg.find_result = find_result\n    flow.set('stack_id', find_result.Id)\n}\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 2771.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "ec8463ef7d9368f4"
+      ]
+    ]
+  },
+  {
+    "id": "ec8463ef7d9368f4",
+    "type": "switch",
+    "z": "7b4414036a759f67",
+    "name": "is stack found ?",
+    "property": "found",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 2,
+    "x": 3091.0003204345703,
+    "y": 140.00000190734863,
+    "wires": [
+      [
+        "83f0f152d7a9ab60"
+      ],
+      [
+        "9db6c04d30b31db2",
+        "a25b017f33bd9b88"
+      ]
+    ],
+    "outputLabels": [
+      "stack was not found",
+      "stack was found"
+    ]
+  },
+  {
+    "id": "9db6c04d30b31db2",
+    "type": "debug",
+    "z": "7b4414036a759f67",
+    "name": "dont delete stack",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 3401.0003204345703,
+    "y": 160.00000190734863,
+    "wires": []
+  },
+  {
+    "id": "a25b017f33bd9b88",
+    "type": "http response",
+    "z": "7b4414036a759f67",
+    "name": "ok",
+    "statusCode": "200",
+    "headers": {},
+    "x": 3361.0003204345703,
+    "y": 220.00000190734863,
+    "wires": []
+  },
+  {
+    "id": "d6733ee4e9ee17f1",
+    "type": "debug",
+    "z": "7b4414036a759f67",
+    "name": "stack deleted",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 4050,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "83f0f152d7a9ab60",
+    "type": "function",
+    "z": "7b4414036a759f67",
+    "name": "set params for DELETE /api/stacks/{{id}}",
+    "func": "msg.url = flow.get('portainer_base_url')+\"/api/stacks/\"+flow.get('stack_id')+\"?endpointId=\"+flow.get('portainer_endpoint_id')\nmsg.method = 'DELETE'\nmsg.headers = {\n    \"Authorization\": \"Bearer \"+flow.get('portainer_jwt')\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3471.0003204345703,
+    "y": 100.00000190734863,
+    "wires": [
+      [
+        "6b847399892e7830"
+      ]
+    ]
+  },
+  {
+    "id": "6b847399892e7830",
+    "type": "http request",
+    "z": "7b4414036a759f67",
+    "name": "DELETE /api/stacks/{{id}}",
+    "method": "use",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [
+      {
+        "keyType": "Content-Type",
+        "keyValue": "",
+        "valueType": "application/json",
+        "valueValue": ""
+      }
+    ],
+    "x": 3811.0003204345703,
+    "y": 100.00000953674316,
+    "wires": [
+      [
+        "d6733ee4e9ee17f1",
+        "e5e08b342668bf2e"
+      ]
+    ]
+  },
+  {
+    "id": "e5e08b342668bf2e",
+    "type": "http response",
+    "z": "7b4414036a759f67",
+    "name": "deleted",
+    "statusCode": "204",
+    "headers": {},
+    "x": 4040,
+    "y": 100,
+    "wires": []
+  }
+]
