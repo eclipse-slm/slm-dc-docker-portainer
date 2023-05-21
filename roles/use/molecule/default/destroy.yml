@@ -7,7 +7,7 @@
   tasks:
     # Developer must implement.
     - include_role:
-        name: molecule_libvirt
+        name: molecule_vsphere
         tasks_from: destroy.yml
 
     # Mandatory configuration for Molecule to function.
