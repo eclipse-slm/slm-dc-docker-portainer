@@ -2,9 +2,9 @@
 roles:
   - src: "git+https://github.com/eclipse-slm/slm-ansible-role-inventory-helper"
     scm: git
-    version: main
+    version: 1.0.0
     name: inventory_helper
   - src: "git+https://github.com/eclipse-slm/slm-ansible-role-docker"
     scm: git
-    version: main
+    version: 1.0.0
     name: docker

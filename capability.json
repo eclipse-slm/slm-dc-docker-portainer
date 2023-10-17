@@ -12,7 +12,7 @@
       "capabilityActionClass": "AwxCapabilityAction",
       "capabilityActionType": "DEPLOY",
       "awxRepo": "https://github.com/eclipse-slm/slm-dc-docker-portainer",
-      "awxBranch": "main",
+      "awxBranch": "1.0.0",
       "playbook": "deploy.yml",
       "connectionTypes": ["http"]
     },
@@ -20,7 +20,7 @@
       "capabilityActionClass": "AwxCapabilityAction",
       "capabilityActionType": "UNINSTALL",
       "awxRepo": "https://github.com/eclipse-slm/slm-dc-docker-portainer",
-      "awxBranch": "main",
+      "awxBranch": "1.0.0",
       "playbook": "uninstall.yml",
       "connectionTypes": ["ssh", "WinSsh"]
     },
@@ -28,7 +28,7 @@
       "capabilityActionClass": "AwxCapabilityAction",
       "capabilityActionType": "INSTALL",
       "awxRepo": "https://github.com/eclipse-slm/slm-dc-docker-portainer",
-      "awxBranch": "main",
+      "awxBranch": "1.0.0",
       "playbook": "install.yml",
       "connectionTypes": ["ssh", "WinSsh"],
       "skipable": true,
@@ -56,7 +56,7 @@
       "capabilityActionClass": "AwxCapabilityAction",
       "capabilityActionType": "UNDEPLOY",
       "awxRepo": "https://github.com/eclipse-slm/slm-dc-docker-portainer",
-      "awxBranch": "main",
+      "awxBranch": "1.0.0",
       "playbook": "undeploy.yml",
       "connectionTypes": ["http"]
     }
